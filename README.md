@@ -14,7 +14,7 @@ Or get it using **Gradle:**
 
 ````groovy
 dependencies {
-    compile 'com.subinkrishna:circularimageview:1.1.0'
+    compile 'com.subinkrishna:circularimageview:1.2.2'
 }
 ````
 
@@ -24,7 +24,7 @@ Or **Maven:**
 <dependency>
   <groupId>com.subinkrishna</groupId>
   <artifactId>circularimageview</artifactId>
-  <version>1.1.0</version>
+  <version>1.2.2</version>
 </dependency>
 ````
 
@@ -43,7 +43,9 @@ Or **Maven:**
     app:ci_placeholderBackgroundColor="@android:color/black"
     app:ci_placeholderText="CV"
     app:ci_placeholderTextSize="22sp"
-    app:ci_placeholderTextColor="@android:color/white" />
+    app:ci_placeholderTextColor="@android:color/white"
+    app:ci_shadowRadius="5.0"
+    app:ci_shadowColor="#999999" />
 ````
 
 **Java:**
@@ -54,6 +56,8 @@ imageView.setBorderColor(Color.WHITE);
 imageView.setBorderWidth(TypedValue.COMPLEX_UNIT_DIP, 2);
 imageView.setPlaceholder("CV", Color.BLACK, Color.WHITE);
 imageView.setPlaceholderTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
+imageView.setShadowRadius(5.0f);
+imageView.setShadowColor(0xFF999999);
 ````
 
 **Custom Attributes**
@@ -66,6 +70,8 @@ imageView.setPlaceholderTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
 * `ci_placeholderBackgroundColor` (default: `#FFDDDDDD`)
 * `ci_checked` (default: `false`)
 * `ci_checkedStateBackgroundColor` (default: `#FFBBBBBB`)
+* `ci_shadowRadius` (default: `0`)
+* `ci_shadowColor` (default: `#FF666666`)
 
 **Java Methods**
 
@@ -77,6 +83,9 @@ imageView.setPlaceholderTextSize(TypedValue.COMPLEX_UNIT_SP, 22);
 * `setCheckedStateBackgroundColor(@ColorInt int backgroundColor)`
 * `setImageAlpha(int alpha)`
 * `allowCheckStateAnimation(boolean allowAnimation)`
+* `setShadowRadius(float radius)`
+* `setShadowColor(@ColorInt int shadowColor)`
+* `allowCheckStateShadow(boolean allowShadow)`
 
 Methods implemented from `android.widget.Checkable`
 
@@ -169,26 +178,43 @@ Placeholder text is shown along with custom border & background when no bitmap i
 
 ## Changelog
 
-#### 1.1.0
-
-* Added support for alpha (`setImageAlpha(int alpha)` & `getImageAlpha()`)
-* Added support to enable/disable check state change animation
-* Added support to override check mark style, runtime border visibility
-* Bug fixes
-
-#### 1.0.2
-
-* `CircularImageView` implements `android.widget.Checkable`
-
-#### 1.0.1
-
-* Renamed all custom attributes to suffix `ci_` to avoid conflicts
+You can find the changelog [here][Changelog].
 
 ## Limitations & known issues
 
-* Supports only `BitmapDrawable`s.
 * CircularImageView doesn't resize bitmaps to match the view size.
 * No support for animations. Please use `DrawableTypeRequest.asBitmap()` to make CircularImageView to work with [Glide][glide].
+
+## Using vectors/XML drawable resources
+
+As of now, XML drawable resources need to be set using `setImageBitmap()`.
+
+```java
+final Bitmap bitmap = getBitmap(context, resId, width, height);
+image.setImageBitmap(bitmap);
+
+// Converts the drawable resource to Bitmap
+public static Bitmap getBitmap(Context context,
+                               int resId,
+                               int w,
+                               int h) {
+    Drawable drawable = AppCompatDrawableManager.get().getDrawable(context, resId);
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+        drawable = (DrawableCompat.wrap(drawable)).mutate();
+    }
+
+    Bitmap bitmap = (w > 0) && (h > 0)
+            ? Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
+            : null;
+    if (null != bitmap) {
+        final Canvas canvas = new Canvas(bitmap);
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
+    }
+
+    return bitmap;
+}
+```
 
 ## License
 
@@ -210,3 +236,4 @@ Placeholder text is shown along with custom border & background when no bitmap i
 [app]:https://play.google.com/store/apps/details?id=com.subinkrishna.circularimageview.demo
 [picasso]: http://square.github.io/picasso/
 [glide]: https://github.com/bumptech/glide
+[changelog]: Changelog.md
